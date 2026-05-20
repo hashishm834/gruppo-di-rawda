@@ -39,23 +39,36 @@ export default function LeadsPage() {
     fetchLeads();
   }, []);
 
+  // 🚀 Optimistic Update لقراءة الرسالة
   const markAsRead = async (id: string) => {
+    // تحديث الواجهة فوراً
+    setLeads((prev) => prev.map(l => l.id === id ? { ...l, is_read: true } : l));
+    
     try {
       await supabase.from("leads").update({ is_read: true }).eq("id", id);
-      fetchLeads();
     } catch (err) {
-      console.error(err);
+      console.error("خطأ في تحديث حالة القراءة:", err);
     }
   };
 
+  // 🚀 Optimistic Update لحذف الرسالة
   const handleDelete = async (id: string) => {
     if (!window.confirm("هل أنت متأكد من حذف هذا الطلب نهائياً؟")) return;
+    
+    // الاحتفاظ بنسخة قديمة في حالة الفشل
+    const previousLeads = [...leads];
+    
+    // تحديث الواجهة فوراً قبل الرد من السيرفر
+    setLeads((prev) => prev.filter(l => l.id !== id));
+    
     try {
       await supabase.from("leads").delete().eq("id", id);
-      fetchLeads();
       if (activeLead?.id === id) closeModal(); // لو حذفه من جوه النافذة، اقفلها
     } catch (err) {
-      alert("فشل الحذف");
+      console.error("فشل الحذف:", err);
+      alert("فشل الحذف، حدث خطأ ما.");
+      // إرجاع البيانات لو حصل خطأ
+      setLeads(previousLeads); 
     }
   };
 
@@ -144,7 +157,11 @@ export default function LeadsPage() {
                   
                   <div className="flex gap-3">
                     <button 
-                      onClick={(e) => { e.stopPropagation(); handleDelete(lead.id); }}
+                      onClick={(e) => { 
+                        e.preventDefault(); 
+                        e.stopPropagation(); 
+                        handleDelete(lead.id); 
+                      }}
                       className="text-xs bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg transition-colors"
                     >
                       🗑️ حذف
