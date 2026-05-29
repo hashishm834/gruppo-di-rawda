@@ -7,49 +7,42 @@ export default function HomePage() {
   const [settings, setSettings] = useState<any>(null);
   const [services, setServices] = useState<any[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
-  const [testimonials, setTestimonials] = useState<any[]>([]); // 🌟 إضافة State التقييمات من الداتا بيز
+  const [testimonials, setTestimonials] = useState<any[]>([]); 
   const [isScrolled, setIsScrolled] = useState(false);
   
-  // 🌟 نظام اللغات (الافتراضي إيطالي)
   const [lang, setLang] = useState<"AR" | "EN" | "IT">("IT");
 
-  // بيانات نموذج التواصل والحماية
   const [formData, setFormData] = useState({ name: "", phone: "", service: "", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<"idle" | "success" | "error">("idle");
   const [captchaStatus, setCaptchaStatus] = useState<"idle" | "verifying" | "verified">("idle");
 
-  // 📸 حالات التقليب والنوافذ المنبثقة
   const [cardImageIndex, setCardImageIndex] = useState<{ [key: string]: number }>({});
   const [activeItem, setActiveItem] = useState<any>(null); 
   const [modalImgIndex, setModalImgIndex] = useState(0); 
 
-  // 📱 حالة القائمة الجانبية للموبايل
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // 🌟 حالات نموذج إضافة التقييم وعرض التقييمات
   const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
   const [reviewForm, setReviewForm] = useState({ name: "", loc: "", text: "", rating: 5 });
   const [reviewStatus, setReviewStatus] = useState<"idle" | "submitting" | "success">("idle");
-  const [showAllReviews, setShowAllReviews] = useState(false); // 🌟 للتحكم في زر عرض كل التقييمات
+  const [showAllReviews, setShowAllReviews] = useState(false); 
 
-  // سحب البيانات من الداش بورد واكتشاف اللغة
   useEffect(() => {
-    const browserLang = navigator.language.split('-')[0].toUpperCase();
-    if (browserLang === "AR") {
-      setLang("AR");
-    } else if (browserLang === "EN") {
-      setLang("EN");
+    // 1️⃣ حماية كود اكتشاف اللغة عشان الموبايل ميضربش Error
+    if (typeof window !== "undefined" && window.navigator && window.navigator.language) {
+      const browserLang = window.navigator.language.split('-')[0].toUpperCase();
+      if (browserLang === "AR") setLang("AR");
+      else if (browserLang === "EN") setLang("EN");
+      else setLang("IT"); 
     } else {
-      setLang("IT"); 
+      setLang("IT"); // لغة افتراضية آمنة
     }
 
     async function fetchData() {
       const { data: settingsData } = await supabase.from("site_settings").select("*").limit(1).single();
       const { data: servicesData } = await supabase.from("services").select("*").eq("is_active", true).order("created_at", { ascending: false }).limit(6);
       const { data: projectsData } = await supabase.from("projects").select("*").order("created_at", { ascending: false }).limit(6);
-      
-      // 🌟 سحب التقييمات الموافق عليها (معروضة) من الداتا بيز
       const { data: reviewsData } = await supabase.from("reviews").select("*").eq("status", "approved").order("created_at", { ascending: false });
       
       if (settingsData) setSettings(settingsData);
@@ -69,15 +62,14 @@ export default function HomePage() {
       }
 
       if (reviewsData) {
-        // 🌟 تهيئة التقييمات لتدعم الترجمة والنجوم مع واجهة المستخدم
         const formattedReviews = reviewsData.map(r => ({
           id: r.id,
           name: r.name,
           loc: r.location,
           rating: r.rating || 5,
           ar: r.review_text,
-          en: r.review_text_en || r.review_text, // لو مفيش ترجمة يعرض العربي
-          it: r.review_text_it || r.review_text  // لو مفيش ترجمة يعرض العربي
+          en: r.review_text_en || r.review_text, 
+          it: r.review_text_it || r.review_text  
         }));
         setTestimonials(formattedReviews);
       }
@@ -89,7 +81,6 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // 🛡️ دوال الإرسال والحماية
   const handleCaptcha = () => {
     if (captchaStatus === "verified") return;
     setCaptchaStatus("verifying");
@@ -124,7 +115,6 @@ export default function HomePage() {
     }
   };
 
-  // 🌟 دالة إرسال التقييم
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setReviewStatus("submitting");
@@ -149,7 +139,6 @@ export default function HomePage() {
     }
   };
 
-  // 💡 دوال الترجمة والتقليب
   const getText = (obj: any, key: string) => {
     if (!obj) return "";
     if (lang === "EN" && obj[`${key}_en`]) return obj[`${key}_en`];
@@ -220,7 +209,6 @@ export default function HomePage() {
   return (
     <div className="bg-[#0a0f16] text-white font-sans scroll-smooth" dir={currentLang.dir}>
       
-      {/* --- الهيدر --- */}
       <header className={`fixed w-full top-0 z-40 transition-all duration-500 border-b ${isScrolled ? "bg-[#0a0f16]/95 backdrop-blur-md border-gray-800 py-3 shadow-lg" : "bg-transparent border-transparent py-6"}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center relative">
           <img src="/logo-construction.png" alt="Logo" className={`transition-all duration-500 object-contain ${isScrolled ? "h-10" : "h-14"}`} />
@@ -242,7 +230,6 @@ export default function HomePage() {
               {currentLang.quoteBtn}
             </a>
 
-            {/* 📱 زرار الموبايل */}
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
               className="lg:hidden text-gray-300 hover:text-amber-500 transition-colors p-2"
@@ -255,7 +242,6 @@ export default function HomePage() {
             </button>
           </div>
 
-          {/* 📱 قائمة الموبايل المنسدلة */}
           <div className={`absolute top-full left-0 w-full bg-[#0a0f16]/95 backdrop-blur-md border-b border-gray-800 transition-all duration-300 overflow-hidden lg:hidden flex flex-col ${isMobileMenuOpen ? "max-h-64 py-4 opacity-100 shadow-xl" : "max-h-0 opacity-0"}`}>
             <a href="#home" onClick={() => setIsMobileMenuOpen(false)} className="block px-6 py-3 text-white hover:text-amber-500 font-medium border-b border-gray-800/50">{currentLang.nav[0]}</a>
             <a href="#services" onClick={() => setIsMobileMenuOpen(false)} className="block px-6 py-3 text-white hover:text-amber-500 font-medium border-b border-gray-800/50">{currentLang.nav[1]}</a>
@@ -266,7 +252,6 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* --- الواجهة الافتتاحية --- */}
       <section id="home" className="relative h-screen flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 w-full h-full">
           <img src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?q=80&w=1920" alt="Hero" className="w-full h-full object-cover animate-[pulse_20s_ease-in-out_infinite_alternate]" />
@@ -283,7 +268,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- قسم الخدمات --- */}
       <section id="services" className="py-24 bg-[#0d131c]">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-white">{currentLang.secServices}</h2>
@@ -293,13 +277,24 @@ export default function HomePage() {
               const curIdx = cardImageIndex[srv.id] || 0;
               return (
                 <div key={srv.id} onClick={() => openModal(srv)} className="group relative h-[400px] overflow-hidden rounded-2xl cursor-pointer shadow-xl border border-gray-800 hover:border-amber-500/50 transition-all">
-                  <img src={imgs[curIdx]} alt={getText(srv, 'title')} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  
+                  {/* 2️⃣ حل مشكلة تقليب الصور: الصور محملة مسبقاً وبتبدل بنعومة */}
+                  <div className="absolute inset-0 w-full h-full">
+                    {imgs.map((imgUrl: string, idx: number) => (
+                      <img 
+                        key={idx} 
+                        src={imgUrl} 
+                        alt={getText(srv, 'title')} 
+                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${idx === curIdx ? 'opacity-100 group-hover:scale-110' : 'opacity-0'}`} 
+                      />
+                    ))}
+                  </div>
                   
                   {imgs.length > 1 && (
                     <>
-                      <button onClick={(e) => prevImage(e, srv.id, imgs.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-amber-500 transition-all flex items-center justify-center">❯</button>
-                      <button onClick={(e) => nextImage(e, srv.id, imgs.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-amber-500 transition-all flex items-center justify-center">❮</button>
-                      <div className="absolute bottom-24 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={(e) => prevImage(e, srv.id, imgs.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-amber-500 transition-all flex items-center justify-center z-10">❯</button>
+                      <button onClick={(e) => nextImage(e, srv.id, imgs.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/50 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-amber-500 transition-all flex items-center justify-center z-10">❮</button>
+                      <div className="absolute bottom-24 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         {imgs.map((_: any, idx: number) => <div key={idx} className={`h-1.5 rounded-full ${idx === curIdx ? 'w-4 bg-amber-500' : 'w-1.5 bg-white/50'}`} />)}
                       </div>
                     </>
@@ -317,7 +312,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- قسم المشاريع --- */}
       <section id="projects" className="py-24 bg-[#0a0f16]">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-white">{currentLang.secProjects}</h2>
@@ -327,13 +321,24 @@ export default function HomePage() {
               const curIdx = cardImageIndex[proj.id] || 0;
               return (
                 <div key={proj.id} onClick={() => openModal(proj)} className="group relative h-[350px] overflow-hidden rounded-xl cursor-pointer border border-gray-800 hover:border-amber-500/50 transition-all">
-                  <img src={imgs[curIdx]} alt={getText(proj, 'title')} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 grayscale-[20%] group-hover:grayscale-0" />
+                  
+                  {/* 2️⃣ نفس الحل للتقليب الناعم في المشاريع */}
+                  <div className="absolute inset-0 w-full h-full">
+                    {imgs.map((imgUrl: string, idx: number) => (
+                      <img 
+                        key={idx} 
+                        src={imgUrl} 
+                        alt={getText(proj, 'title')} 
+                        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 grayscale-[20%] group-hover:grayscale-0 ${idx === curIdx ? 'opacity-100 group-hover:scale-105' : 'opacity-0'}`} 
+                      />
+                    ))}
+                  </div>
                   
                   {imgs.length > 1 && (
                     <>
-                      <button onClick={(e) => prevImage(e, proj.id, imgs.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-amber-500 transition-all flex items-center justify-center">❯</button>
-                      <button onClick={(e) => nextImage(e, proj.id, imgs.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-amber-500 transition-all flex items-center justify-center">❮</button>
-                      <div className="absolute bottom-24 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button onClick={(e) => prevImage(e, proj.id, imgs.length)} className="absolute right-3 top-1/2 -translate-y-1/2 bg-black/60 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-amber-500 transition-all flex items-center justify-center z-10">❯</button>
+                      <button onClick={(e) => nextImage(e, proj.id, imgs.length)} className="absolute left-3 top-1/2 -translate-y-1/2 bg-black/60 text-white w-8 h-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-amber-500 transition-all flex items-center justify-center z-10">❮</button>
+                      <div className="absolute bottom-24 left-0 right-0 flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         {imgs.map((_: any, idx: number) => <div key={idx} className={`h-1.5 rounded-full ${idx === curIdx ? 'w-4 bg-amber-500' : 'w-1.5 bg-white/50'}`} />)}
                       </div>
                     </>
@@ -351,13 +356,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* 🌟 --- قسم Social Proof (آراء العملاء) --- 🌟 */}
       <section className="py-24 bg-[#0d131c] border-y border-gray-800">
         <div className="max-w-7xl mx-auto px-6">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-16 text-white">{currentLang.secReviews}</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {/* 🌟 عرض التقييمات بناءً على حالة showAllReviews */}
             {(showAllReviews ? testimonials : testimonials.slice(0, 3)).map((testi) => (
               <div 
                 key={testi.id} 
@@ -385,7 +388,6 @@ export default function HomePage() {
               </div>
             ))}
             
-            {/* رسالة في حالة عدم وجود تقييمات معتمدة */}
             {testimonials.length === 0 && (
               <div className="col-span-1 md:col-span-3 text-center text-gray-500 py-10">
                 لا توجد تقييمات معروضة حالياً.
@@ -394,7 +396,6 @@ export default function HomePage() {
           </div>
 
           <div className="mt-16 flex flex-col items-center gap-6">
-             {/* 🌟 زر عرض/إخفاء المزيد (شغال دلوقتي) */}
              {testimonials.length > 3 && (
                <button 
                  onClick={() => setShowAllReviews(!showAllReviews)}
@@ -414,7 +415,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- قسم التواصل --- */}
       <section id="contact" className="py-24 bg-gradient-to-b from-[#0a0f16] to-[#0a0f16]">
         <div className="max-w-4xl mx-auto px-6 text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-4 text-white">{currentLang.secContact}</h2>
@@ -454,7 +454,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* --- الفوتر --- */}
       <footer className="bg-[#05080c] border-t border-gray-800 pt-16 pb-8">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12 text-center md:text-start">
@@ -507,7 +506,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* 🌟 النافذة المنبثقة لإضافة تقييم (Review Modal) */}
       {isReviewModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0f16]/95 backdrop-blur-md p-4 sm:p-8">
           <div className="bg-[#111827] w-full max-w-lg rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-gray-800 p-8 relative animate-fade-in-up">
@@ -557,22 +555,22 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 🌟 النافذة المنبثقة للتفاصيل والصور (للمشاريع، الخدمات، والتقييمات) */}
       {activeItem && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0a0f16]/95 backdrop-blur-md p-4 sm:p-8">
-          <button onClick={closeModal} className="absolute top-6 right-6 lg:right-12 text-gray-400 hover:text-white bg-gray-800 hover:bg-red-500 w-12 h-12 rounded-full flex items-center justify-center transition-all z-50 shadow-lg text-2xl font-bold">✕</button>
+          <button onClick={closeModal} className="absolute top-4 right-4 lg:top-6 lg:right-12 text-gray-400 hover:text-white bg-gray-800 hover:bg-red-500 w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center transition-all z-50 shadow-lg text-xl lg:text-2xl font-bold">✕</button>
           
           <div className={`bg-[#111827] w-full ${activeItem.isReview ? "max-w-3xl" : "max-w-6xl"} max-h-[90vh] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-gray-800 flex flex-col ${activeItem.isReview ? "items-center text-center justify-center p-12" : "lg:flex-row"} animate-fade-in-up`}>
             
             {!activeItem.isReview && (
-              <div className="w-full lg:w-3/5 h-64 sm:h-96 lg:h-[80vh] relative bg-black group/modal">
+              // 3️⃣ حل مشكلة الصورة مع النص (تصغير الصورة على الموبايل لـ h-48)
+              <div className="w-full lg:w-3/5 h-48 sm:h-64 lg:h-[80vh] shrink-0 relative bg-black group/modal">
                 {getImages(activeItem).length > 0 ? (
                   <>
                     <img src={getImages(activeItem)[modalImgIndex]} alt="Preview" className="w-full h-full object-contain transition-opacity duration-300" />
                     {getImages(activeItem).length > 1 && (
                       <>
-                        <button onClick={() => setModalImgIndex(p => (p + 1) % getImages(activeItem).length)} className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#0a0f16]/70 hover:bg-amber-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all opacity-0 group-hover/modal:opacity-100">❯</button>
-                        <button onClick={() => setModalImgIndex(p => (p - 1 + getImages(activeItem).length) % getImages(activeItem).length)} className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#0a0f16]/70 hover:bg-amber-500 text-white w-12 h-12 rounded-full flex items-center justify-center text-xl transition-all opacity-0 group-hover/modal:opacity-100">❮</button>
+                        <button onClick={() => setModalImgIndex(p => (p + 1) % getImages(activeItem).length)} className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#0a0f16]/70 hover:bg-amber-500 text-white w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center text-lg lg:text-xl transition-all opacity-0 group-hover/modal:opacity-100">❯</button>
+                        <button onClick={() => setModalImgIndex(p => (p - 1 + getImages(activeItem).length) % getImages(activeItem).length)} className="absolute left-4 top-1/2 -translate-y-1/2 bg-[#0a0f16]/70 hover:bg-amber-500 text-white w-10 h-10 lg:w-12 lg:h-12 rounded-full flex items-center justify-center text-lg lg:text-xl transition-all opacity-0 group-hover/modal:opacity-100">❮</button>
                         <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
                           {getImages(activeItem).map((_: any, idx: number) => (
                             <button key={idx} onClick={() => setModalImgIndex(idx)} className={`h-2 rounded-full transition-all ${idx === modalImgIndex ? 'w-6 bg-amber-500' : 'w-2 bg-white/50'}`} />
@@ -587,7 +585,8 @@ export default function HomePage() {
               </div>
             )}
 
-            <div className={`w-full ${activeItem.isReview ? "w-full flex flex-col items-center justify-center" : "lg:w-2/5 p-8 lg:p-12"} overflow-y-auto custom-scrollbar flex flex-col justify-center`}>
+            {/* 3️⃣ إضافة flex-1 لتقليل الضغط على النص */}
+            <div className={`w-full ${activeItem.isReview ? "w-full flex flex-col items-center justify-center" : "lg:w-2/5 p-6 lg:p-12"} flex-1 overflow-y-auto custom-scrollbar flex flex-col justify-start lg:justify-center`}>
               
               {activeItem.isReview ? (
                 <>
@@ -615,12 +614,12 @@ export default function HomePage() {
                   <span className="text-amber-500 font-mono text-sm mb-3 block">
                     {activeItem.location || "GRUPPO DI RAWDA"}
                   </span>
-                  <h2 className="text-3xl lg:text-4xl font-bold text-white mb-6 leading-tight">
+                  <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white mb-4 lg:mb-6 leading-tight">
                     {getText(activeItem, 'title')}
                   </h2>
-                  <div className="w-16 h-1 bg-amber-500 mb-6 rounded-full"></div>
+                  <div className="w-16 h-1 bg-amber-500 mb-4 lg:mb-6 rounded-full"></div>
                   
-                  <p className="text-gray-300 text-lg leading-relaxed mb-10 whitespace-pre-wrap">
+                  <p className="text-gray-300 text-sm sm:text-base lg:text-lg leading-relaxed mb-8 lg:mb-10 whitespace-pre-wrap">
                     {getText(activeItem, 'description')}
                   </p>
 
@@ -630,7 +629,7 @@ export default function HomePage() {
                       setFormData({ ...formData, service: getText(activeItem, 'title') }); 
                       document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' }); 
                     }}
-                    className="w-full bg-transparent border-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-[#0a0f16] py-4 rounded-xl font-bold text-lg transition-all"
+                    className="w-full bg-transparent border-2 border-amber-500 text-amber-500 hover:bg-amber-500 hover:text-[#0a0f16] py-3 lg:py-4 rounded-xl font-bold text-base lg:text-lg transition-all mt-auto"
                   >
                     {currentLang.requestThis}
                   </button>
@@ -641,7 +640,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* 🌟 زر الواتساب العائم */}
       <a
         href="https://wa.me/393514264494?text=Buongiorno,%20vorrei%20un%20preventivo%20per%20una%20ristrutturazione."
         target="_blank"
