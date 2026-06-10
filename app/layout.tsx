@@ -1,3 +1,4 @@
+import Script from 'next/script';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Cairo, Tajawal } from "next/font/google";
 import "./globals.css";
@@ -59,6 +60,25 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${cairo.variable} ${tajawal.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans">
+        
+        {/* Google Tag (gtag.js) */}
+        <Script 
+          strategy="afterInteractive" 
+          src="https://www.googletagmanager.com/gtag/js?id=G-RTX4RL5DN7" 
+        />
+        <Script
+          id="google-analytics"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-RTX4RL5DN7');
+            `,
+          }}
+        />
+
         {children}
       </body>
     </html>
