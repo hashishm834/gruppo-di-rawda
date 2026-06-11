@@ -29,14 +29,13 @@ export default function HomePage() {
   const [showAllReviews, setShowAllReviews] = useState(false); 
 
   useEffect(() => {
-    // 1️⃣ حماية كود اكتشاف اللغة عشان الموبايل ميضربش Error
     if (typeof window !== "undefined" && window.navigator && window.navigator.language) {
       const browserLang = window.navigator.language.split('-')[0].toUpperCase();
       if (browserLang === "AR") setLang("AR");
       else if (browserLang === "EN") setLang("EN");
       else setLang("IT"); 
     } else {
-      setLang("IT"); // لغة افتراضية آمنة
+      setLang("IT"); 
     }
 
     async function fetchData() {
@@ -139,6 +138,17 @@ export default function HomePage() {
     }
   };
 
+  // دالة تتبع الواتساب لجوجل إعلانات
+  const handleWhatsAppClick = () => {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', 'generate_lead', {
+        event_category: 'Contact',
+        event_label: 'WhatsApp_Button_Click',
+      });
+    }
+    window.open('https://wa.me/393514264494?text=Buongiorno,%20vorrei%20un%20preventivo%20per%20una%20ristrutturazione.', '_blank');
+  };
+
   const getText = (obj: any, key: string) => {
     if (!obj) return "";
     if (lang === "EN" && obj[`${key}_en`]) return obj[`${key}_en`];
@@ -180,7 +190,8 @@ export default function HomePage() {
       addReviewBtn: "أضف تقييمك", revName: "الاسم", revLoc: "المنطقة / المدينة", revDesc: "وصف تجربتك", revSubmit: "إرسال التقييم", revSuccess: "تم إرسال تقييمك بنجاح! سيتم مراجعته.",
       secContact: "ابدأ مشروعك معنا", formName: "الاسم بالكامل", formPhone: "رقم الهاتف", formService: "الخدمة المطلوبة",
       formMessage: "تفاصيل المشروع", formSubmit: "إرسال الطلب", successMsg: "تم الإرسال بنجاح!", captchaText: "أنا لست روبوت",
-      captchaError: "⚠️ يرجى تأكيد أنك لست روبوت!", close: "إغلاق", requestThis: "اطلب هذه الخدمة"
+      captchaError: "⚠️ يرجى تأكيد أنك لست روبوت!", close: "إغلاق", requestThis: "اطلب هذه الخدمة",
+      footerLinks: "روابط سريعة", footerContact: "تواصل معنا"
     },
     EN: {
       dir: "ltr", nav: ["Home", "Services", "Projects", "Contact"], quoteBtn: "Get a Quote",
@@ -190,7 +201,8 @@ export default function HomePage() {
       addReviewBtn: "Add Your Review", revName: "Name", revLoc: "Location / City", revDesc: "Describe your experience", revSubmit: "Submit Review", revSuccess: "Review submitted successfully! It will be reviewed.",
       secContact: "Start Your Project", formName: "Full Name", formPhone: "Phone Number", formService: "Required Service",
       formMessage: "Project Details", formSubmit: "Submit Request", successMsg: "Sent successfully!", captchaText: "I am not a robot",
-      captchaError: "⚠️ Please verify you are not a robot!", close: "Close", requestThis: "Request This"
+      captchaError: "⚠️ Please verify you are not a robot!", close: "Close", requestThis: "Request This",
+      footerLinks: "Quick Links", footerContact: "Contact Us"
     },
     IT: {
       dir: "ltr", nav: ["Home", "Servizi", "Progetti", "Contatti"], quoteBtn: "Richiedi Preventivo",
@@ -200,7 +212,8 @@ export default function HomePage() {
       addReviewBtn: "Aggiungi Recensione", revName: "Nome", revLoc: "Città / Zona", revDesc: "Descrivi la tua esperienza", revSubmit: "Invia Recensione", revSuccess: "Recensione inviata con successo! Sarà revisionata.",
       secContact: "Inizia il Tuo Progetto", formName: "Nome Completo", formPhone: "Numero di Telefono", formService: "Servizio Richiesto",
       formMessage: "Dettagli del Progetto", formSubmit: "Invia Richiesta", successMsg: "Inviato con successo!", captchaText: "Non sono un robot",
-      captchaError: "⚠️ Verifica di non essere un robot!", close: "Chiudi", requestThis: "Richiedi Questo"
+      captchaError: "⚠️ Verifica di non essere un robot!", close: "Chiudi", requestThis: "Richiedi Questo",
+      footerLinks: "Link Rapidi", footerContact: "Contattaci"
     }
   };
 
@@ -278,7 +291,6 @@ export default function HomePage() {
               return (
                 <div key={srv.id} onClick={() => openModal(srv)} className="group relative h-[400px] overflow-hidden rounded-2xl cursor-pointer shadow-xl border border-gray-800 hover:border-amber-500/50 transition-all">
                   
-                  {/* 2️⃣ حل مشكلة تقليب الصور: الصور محملة مسبقاً وبتبدل بنعومة */}
                   <div className="absolute inset-0 w-full h-full">
                     {imgs.map((imgUrl: string, idx: number) => (
                       <img 
@@ -322,7 +334,6 @@ export default function HomePage() {
               return (
                 <div key={proj.id} onClick={() => openModal(proj)} className="group relative h-[350px] overflow-hidden rounded-xl cursor-pointer border border-gray-800 hover:border-amber-500/50 transition-all">
                   
-                  {/* 2️⃣ نفس الحل للتقليب الناعم في المشاريع */}
                   <div className="absolute inset-0 w-full h-full">
                     {imgs.map((imgUrl: string, idx: number) => (
                       <img 
@@ -466,7 +477,8 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h4 className="text-white font-bold mb-6 text-lg">روابط سريعة</h4>
+              {/* تعديل الترجمة هنا */}
+              <h4 className="text-white font-bold mb-6 text-lg">{currentLang.footerLinks}</h4>
               <div className="flex flex-col gap-3 text-sm font-medium">
                 <a href="#home" className="text-gray-400 hover:text-amber-500 transition-colors">{currentLang.nav[0]}</a>
                 <a href="#services" className="text-gray-400 hover:text-amber-500 transition-colors">{currentLang.nav[1]}</a>
@@ -476,7 +488,8 @@ export default function HomePage() {
             </div>
 
             <div>
-              <h4 className="text-white font-bold mb-6 text-lg">تواصل معنا</h4>
+              {/* وتعديل الترجمة هنا */}
+              <h4 className="text-white font-bold mb-6 text-lg">{currentLang.footerContact}</h4>
               <div className="text-gray-400 text-sm flex flex-col gap-3 items-center md:items-start mb-6">
                 {settings?.address && <p>📍 {settings.address}</p>}
                 {settings?.phone_number && <p dir="ltr">📞 {settings.phone_number}</p>}
@@ -562,7 +575,6 @@ export default function HomePage() {
           <div className={`bg-[#111827] w-full ${activeItem.isReview ? "max-w-3xl" : "max-w-6xl"} max-h-[90vh] rounded-3xl overflow-hidden shadow-[0_0_50px_rgba(0,0,0,0.8)] border border-gray-800 flex flex-col ${activeItem.isReview ? "items-center text-center justify-center p-12" : "lg:flex-row"} animate-fade-in-up`}>
             
             {!activeItem.isReview && (
-              // 3️⃣ حل مشكلة الصورة مع النص (تصغير الصورة على الموبايل لـ h-48)
               <div className="w-full lg:w-3/5 h-48 sm:h-64 lg:h-[80vh] shrink-0 relative bg-black group/modal">
                 {getImages(activeItem).length > 0 ? (
                   <>
@@ -585,7 +597,6 @@ export default function HomePage() {
               </div>
             )}
 
-            {/* 3️⃣ إضافة flex-1 لتقليل الضغط على النص */}
             <div className={`w-full ${activeItem.isReview ? "w-full flex flex-col items-center justify-center" : "lg:w-2/5 p-6 lg:p-12"} flex-1 overflow-y-auto custom-scrollbar flex flex-col justify-start lg:justify-center`}>
               
               {activeItem.isReview ? (
@@ -640,16 +651,15 @@ export default function HomePage() {
         </div>
       )}
 
-      <a
-        href="https://wa.me/393514264494?text=Buongiorno,%20vorrei%20un%20preventivo%20per%20una%20ristrutturazione."
-        target="_blank"
-        rel="noreferrer"
+      {/* زر الواتساب مع دالة التتبع الجديدة */}
+      <button
+        onClick={handleWhatsAppClick}
         className="fixed bottom-6 right-6 z-[9999] bg-[#25D366] hover:bg-[#128C7E] text-white p-3 rounded-full shadow-[0_4px_15px_rgba(37,211,102,0.4)] transition-all hover:scale-110 flex items-center justify-center"
       >
         <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
           <path fillRule="evenodd" clipRule="evenodd" d="M12.031 0C5.398 0 0 5.398 0 12.031c0 2.128.555 4.205 1.613 6.035L.302 23.69l5.776-1.516a11.966 11.966 0 005.953 1.582h.005c6.632 0 12.031-5.398 12.031-12.031S18.664 0 12.031 0zm0 21.737h-.004a9.98 9.98 0 01-5.084-1.38l-.364-.216-3.784.992.998-3.69-.237-.377a9.96 9.96 0 01-1.523-5.305c0-5.522 4.494-10.016 10.021-10.016 2.676 0 5.19.104 7.081 1.996 1.892 1.891 2.934 4.405 2.934 7.081 0 5.522-4.493 10.015-10.038 10.015zm5.503-7.518c-.302-.151-1.786-.883-2.063-.984-.277-.101-.478-.151-.68.151-.201.302-.781.984-.958 1.185-.176.201-.353.226-.655.075-.302-.151-1.275-.47-2.43-1.503-.9-.804-1.507-1.796-1.684-2.098-.176-.302-.019-.465.132-.616.136-.136.302-.352.453-.528.151-.176.201-.302.302-.503.101-.201.05-.377-.025-.528-.075-.151-.68-1.636-.932-2.24-.246-.59-.495-.51-.68-.52-.176-.008-.377-.01-.579-.01-.201 0-.528.075-.804.377-.276.302-1.056 1.032-1.056 2.516 0 1.484 1.082 2.918 1.233 3.12.151.201 2.128 3.248 5.155 4.553 2.17 1.042 2.87.855 3.373.78.604-.09 1.786-.73 2.038-1.434.252-.704.252-1.308.176-1.434-.076-.126-.277-.201-.579-.352z"/>
         </svg>
-      </a>
+      </button>
 
     </div>
   );
