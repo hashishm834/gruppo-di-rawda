@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+// 1️⃣ استدعاء مكتبة التليفونات وملف التصميم بتاعها
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
 
 export default function HomePage() {
   const [settings, setSettings] = useState<any>(null);
@@ -138,7 +141,6 @@ export default function HomePage() {
     }
   };
 
-  // دالة تتبع الواتساب لجوجل إعلانات
   const handleWhatsAppClick = () => {
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('event', 'generate_lead', {
@@ -222,6 +224,37 @@ export default function HomePage() {
   return (
     <div className="bg-[#0a0f16] text-white font-sans scroll-smooth" dir={currentLang.dir}>
       
+      {/* 2️⃣ إضافة ستايل سريع لضبط شكل قائمة الدول عشان تليق على الموقع الدارك */}
+      <style dangerouslySetInnerHTML={{__html: `
+        .PhoneInput {
+          display: flex;
+          align-items: center;
+          width: 100%;
+          background: #0a0f16;
+          border: 1px solid #374151;
+          border-radius: 0.75rem;
+          padding: 0 1rem;
+        }
+        .PhoneInput:focus-within {
+          border-color: #f59e0b;
+        }
+        .PhoneInputCountry {
+          margin-right: 0.75rem;
+        }
+        .PhoneInputInput {
+          flex: 1;
+          background: transparent;
+          border: none;
+          color: white;
+          padding: 0.75rem 0;
+          outline: none;
+        }
+        .PhoneInputCountrySelect {
+          background: #0a0f16;
+          color: white;
+        }
+      `}} />
+
       <header className={`fixed w-full top-0 z-40 transition-all duration-500 border-b ${isScrolled ? "bg-[#0a0f16]/95 backdrop-blur-md border-gray-800 py-3 shadow-lg" : "bg-transparent border-transparent py-6"}`}>
         <div className="max-w-7xl mx-auto px-6 flex justify-between items-center relative">
           <img src="/logo-construction.png" alt="Logo" className={`transition-all duration-500 object-contain ${isScrolled ? "h-10" : "h-14"}`} />
@@ -437,8 +470,15 @@ export default function HomePage() {
                 <input required type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-[#0a0f16] border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none" />
               </div>
               <div>
+                {/* 3️⃣ استبدال خانة التليفون العادية بخانة المكتبة مع إيطاليا كافتراضي */}
                 <label className="block text-gray-400 mb-2 text-sm">{currentLang.formPhone}</label>
-                <input required type="text" dir="ltr" value={formData.phone} onChange={(e) => setFormData({...formData, phone: e.target.value})} className="w-full bg-[#0a0f16] border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none text-start" />
+                <PhoneInput
+                  international
+                  defaultCountry="IT"
+                  value={formData.phone}
+                  onChange={(val) => setFormData({...formData, phone: val || ""})}
+                  className="focus-within:border-amber-500"
+                />
               </div>
             </div>
             <div className="mb-6">
@@ -477,7 +517,6 @@ export default function HomePage() {
             </div>
 
             <div>
-              {/* تعديل الترجمة هنا */}
               <h4 className="text-white font-bold mb-6 text-lg">{currentLang.footerLinks}</h4>
               <div className="flex flex-col gap-3 text-sm font-medium">
                 <a href="#home" className="text-gray-400 hover:text-amber-500 transition-colors">{currentLang.nav[0]}</a>
@@ -488,7 +527,6 @@ export default function HomePage() {
             </div>
 
             <div>
-              {/* وتعديل الترجمة هنا */}
               <h4 className="text-white font-bold mb-6 text-lg">{currentLang.footerContact}</h4>
               <div className="text-gray-400 text-sm flex flex-col gap-3 items-center md:items-start mb-6">
                 {settings?.address && <p>📍 {settings.address}</p>}
@@ -651,7 +689,6 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* زر الواتساب مع دالة التتبع الجديدة */}
       <button
         onClick={handleWhatsAppClick}
         className="fixed bottom-6 right-6 z-[9999] bg-[#25D366] hover:bg-[#128C7E] text-white p-3 rounded-full shadow-[0_4px_15px_rgba(37,211,102,0.4)] transition-all hover:scale-110 flex items-center justify-center"
