@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-// 1️⃣ استدعاء مكتبة التليفونات وملف التصميم بتاعها
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 
@@ -106,6 +105,12 @@ export default function HomePage() {
         message: formData.message
       }]);
       if (error) throw error;
+
+      // ✅ التتبع عند نجاح الإرسال
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'conversion_event_request_quote');
+      }
+
       setSubmitStatus("success");
       setFormData({ name: "", phone: "", service: "", message: "" }); 
       setCaptchaStatus("idle"); 
@@ -141,14 +146,12 @@ export default function HomePage() {
     }
   };
 
+  // ✅ التتبع عند الضغط على زر الواتساب
   const handleWhatsAppClick = () => {
     if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', 'generate_lead', {
-        event_category: 'Contact',
-        event_label: 'WhatsApp_Button_Click',
-      });
+      (window as any).gtag('event', 'conversion_event_request_quote');
     }
-    window.open('https://wa.me/393514264494?text=Buongiorno,%20vorrei%20un%20preventivo%20per%20una%20ristrutturazione.', '_blank');
+    window.open('https://wa.me/393514264494?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%20%D9%88%D8%B1%D8%AD%D9%85%D8%A9%20%D8%A7%D9%84%D9%84%D9%87%20%D9%88%D8%A8%D8%B1%D9%83%D8%A7%D8%AA%D9%87', '_blank');
   };
 
   const getText = (obj: any, key: string) => {
@@ -224,7 +227,6 @@ export default function HomePage() {
   return (
     <div className="bg-[#0a0f16] text-white font-sans scroll-smooth" dir={currentLang.dir}>
       
-      {/* 2️⃣ إضافة ستايل سريع لضبط شكل قائمة الدول عشان تليق على الموقع الدارك */}
       <style dangerouslySetInnerHTML={{__html: `
         .PhoneInput {
           display: flex;
@@ -470,7 +472,6 @@ export default function HomePage() {
                 <input required type="text" value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})} className="w-full bg-[#0a0f16] border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-amber-500 outline-none" />
               </div>
               <div>
-                {/* 3️⃣ استبدال خانة التليفون العادية بخانة المكتبة مع إيطاليا كافتراضي */}
                 <label className="block text-gray-400 mb-2 text-sm">{currentLang.formPhone}</label>
                 <PhoneInput
                   international
@@ -478,6 +479,7 @@ export default function HomePage() {
                   value={formData.phone}
                   onChange={(val) => setFormData({...formData, phone: val || ""})}
                   className="focus-within:border-amber-500"
+                  required
                 />
               </div>
             </div>
